@@ -1,4 +1,4 @@
-package com.jpmorgan.thedevice.core;
+package com.stronans.thedevice.core;
 
 /**
  * Created by S.King on 15/02/2017.

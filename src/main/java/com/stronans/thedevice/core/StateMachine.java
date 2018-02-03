@@ -1,23 +1,23 @@
-package com.jpmorgan.thedevice.core;
+package com.stronans.thedevice.core;
 
 /**
- * Heart of the Device. Statemachine which watches the buttons/Wires and Switches to change state during execution.
+ * Heart of the Device. Statemachine which watches the buttons/Wires and Switches changing state during execution.
  * <p>
  * Created by S.King on 13/02/2017.
  */
 
-import com.jpmorgan.thedevice.buttons.ButtonListener;
-import com.jpmorgan.thedevice.buttons.ButtonName;
-import com.jpmorgan.thedevice.buttons.Buttons;
-import com.jpmorgan.thedevice.colours.CSVFileReader;
-import com.jpmorgan.thedevice.colours.ColourSequence;
-import com.jpmorgan.thedevice.colours.ColourSet;
-import com.jpmorgan.thedevice.switches.SwitchListener;
-import com.jpmorgan.thedevice.switches.SwitchName;
-import com.jpmorgan.thedevice.switches.Switches;
-import com.jpmorgan.thedevice.wires.WireListener;
-import com.jpmorgan.thedevice.wires.WireName;
-import com.jpmorgan.thedevice.wires.Wires;
+import com.stronans.thedevice.buttons.ButtonListener;
+import com.stronans.thedevice.buttons.ButtonName;
+import com.stronans.thedevice.buttons.Buttons;
+import com.stronans.thedevice.colours.CSVFileReader;
+import com.stronans.thedevice.colours.ColourSequence;
+import com.stronans.thedevice.colours.ColourSet;
+import com.stronans.thedevice.switches.SwitchListener;
+import com.stronans.thedevice.switches.SwitchName;
+import com.stronans.thedevice.switches.Switches;
+import com.stronans.thedevice.wires.WireListener;
+import com.stronans.thedevice.wires.WireName;
+import com.stronans.thedevice.wires.Wires;
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import org.apache.logging.log4j.LogManager;
@@ -28,8 +28,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import static com.jpmorgan.thedevice.core.State.*;
-import static com.jpmorgan.thedevice.wires.WireName.NONE;
+import static com.stronans.thedevice.core.State.*;
+import static com.stronans.thedevice.wires.WireName.NONE;
 
 public class StateMachine implements ButtonListener, SwitchListener, WireListener {
     /**
@@ -60,7 +60,7 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
             // create gpio controller
             final GpioController gpio = GpioFactory.getInstance();
 
-            // Setup communications with Nanos
+            // Setup communications with Nano devices
             LEDNano = new SerialCommsNew(LED_NANO, CONNECTION_SPEED);
             LEDNano.startComms();
             LEDNano.sendMessage("REST");
@@ -70,9 +70,9 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
             CountdownNano.sendMessage("WAIT");
 
             // Setup comms with BalloonPopper
-            // Not required here.
+            // Not required here as using a REST interface which is handled by a separate class.
 
-            // Setup Wires
+            // Setup Wires (to be cut) treated as switches.
             Wires wires = new Wires(gpio, this);
             wires.setExpected(NONE);
 
@@ -81,9 +81,13 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
 
             // Setup buttons
             // Big Red button & Start Countdown button
+            /*
+             * The Start Countdown button has only one purpose and that is to start the countdown process.
+             *
+             */
             Buttons buttons = new Buttons(gpio, this);
 
-            // Housekeeping
+            // Housekeeping at shutdown of program
             Runtime.getRuntime().addShutdownHook(new Thread() {
                                                      @Override
                                                      public void run() {
@@ -96,7 +100,7 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
 
             );
 
-            // Read in the colours to choose from
+            // Read in the full colour set to choose a set of six to use during this run
             CSVFileReader file = new CSVFileReader();
             InputStream is = getClass().getResourceAsStream("/colourset.csv");
             colourSequences = file.read(is);
@@ -112,7 +116,7 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
 
     @Override
     // A button has been pressed
-    public void signal(ButtonName name) {
+    public void buttonPressed(ButtonName name) {
 
         switch (name) {
             case BIG_RED:
@@ -163,7 +167,7 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
     }
 
     @Override
-    public void signalHigh(SwitchName name) {
+    public void switchThrown(SwitchName name) {
         log.debug("Switch thrown");
 
         switch (state) {
@@ -182,7 +186,7 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
     }
 
     @Override
-    public void signalLow(WireName name) {
+    public void wireCut(WireName name) {
         log.debug("Wire Cut");
 
         switch (state) {

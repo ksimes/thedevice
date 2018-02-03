@@ -1,4 +1,4 @@
-package com.jpmorgan.thedevice.core;
+package com.stronans.thedevice.core;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;

@@ -1,5 +1,6 @@
-package com.jpmorgan.thedevice.buttons;
+package com.stronans.thedevice.wires;
 
+import com.stronans.thedevice.buttons.Button;
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
 import com.pi4j.io.gpio.PinPullResistance;
@@ -12,19 +13,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A single button to detect a button press.
+ * A single wire to detect an individual wire being cut.
  * <p>
  * Created by S.King on 15/02/2017.
  */
-public class Button {
+public class Wire {
     /**
      * The <code>Logger</code> to be used.
      */
     private static Logger log = LogManager.getLogger(Button.class);
-    private ButtonName gpioPin;
-    private List<ButtonListener> listeners = new ArrayList<>();
+    private WireName gpioPin;
+    private List<WireListener> listeners = new ArrayList<>();
 
-    public Button(ButtonName gpioPin, final GpioController gpio) {
+    public Wire(WireName gpioPin, final GpioController gpio) {
 
         this.gpioPin = gpioPin;
 
@@ -38,8 +39,8 @@ public class Button {
         thisPin.addListener(new GpioPinListenerDigital() {
             @Override
             public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
-                // Button goes high when it has been pressed
-                if (event.getState().isHigh()) {
+                // Wire goes low as it has been cut
+                if (event.getState().isLow()) {
                     notifyListeners(gpioPin);
                 }
 
@@ -49,7 +50,7 @@ public class Button {
         });
     }
 
-    boolean addListener(ButtonListener listener) {
+    public boolean addListener(WireListener listener) {
         boolean result = false;
 
         listeners.add(listener);
@@ -57,12 +58,10 @@ public class Button {
         return result;
     }
 
-    private void notifyListeners(ButtonName gpioPin) {
-        log.trace(" Notify : " + gpioPin.toString());
-
+    private void notifyListeners(WireName gpioPin) {
         if (!listeners.isEmpty()) {
-            for (ButtonListener listener : listeners) {
-                listener.signal(gpioPin);
+            for (WireListener listener : listeners) {
+                listener.wireCut(gpioPin);
             }
         }
     }

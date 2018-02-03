@@ -1,4 +1,4 @@
-package com.jpmorgan.thedevice.colours;
+package com.stronans.thedevice.colours;
 
 /**
  * Created by S.King on 15/02/2017.

@@ -1,11 +1,11 @@
-package com.jpmorgan.thedevice.switches;
+package com.stronans.thedevice.switches;
 
 import com.pi4j.io.gpio.GpioController;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.jpmorgan.thedevice.switches.SwitchName.*;
+import static com.stronans.thedevice.switches.SwitchName.*;
 
 /**
  * Handles all of the wires on the Device

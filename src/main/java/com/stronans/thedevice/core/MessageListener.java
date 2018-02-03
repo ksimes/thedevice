@@ -1,4 +1,4 @@
-package com.jpmorgan.thedevice.core;
+package com.stronans.thedevice.core;
 
 public interface MessageListener {
     void messageReceived() ;

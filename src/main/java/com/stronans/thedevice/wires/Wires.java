@@ -1,11 +1,11 @@
-package com.jpmorgan.thedevice.wires;
+package com.stronans.thedevice.wires;
 
 import com.pi4j.io.gpio.GpioController;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.jpmorgan.thedevice.wires.WireName.*;
+import static com.stronans.thedevice.wires.WireName.*;
 
 /**
  * Handles all of the wires on the Device

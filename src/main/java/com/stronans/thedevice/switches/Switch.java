@@ -1,13 +1,10 @@
-package com.jpmorgan.thedevice.wires;
+package com.stronans.thedevice.switches;
 
-import com.jpmorgan.thedevice.buttons.Button;
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
 import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,15 +14,11 @@ import java.util.List;
  * <p>
  * Created by S.King on 15/02/2017.
  */
-public class Wire {
-    /**
-     * The <code>Logger</code> to be used.
-     */
-    private static Logger log = LogManager.getLogger(Button.class);
-    private WireName gpioPin;
-    private List<WireListener> listeners = new ArrayList<>();
+public class Switch {
+    private SwitchName gpioPin;
+    private List<SwitchListener> listeners = new ArrayList<>();
 
-    public Wire(WireName gpioPin, final GpioController gpio) {
+    public Switch(SwitchName gpioPin, final GpioController gpio) {
 
         this.gpioPin = gpioPin;
 
@@ -45,12 +38,13 @@ public class Wire {
                 }
 
                 // display pin state on console
-                log.trace(" --> GPIO PIN STATE CHANGE: " + event.getPin() + " = " + event.getState());
+                System.out.println(" --> GPIO PIN STATE CHANGE: " + event.getPin() + " = " + event.getState());
+
             }
         });
     }
 
-    public boolean addListener(WireListener listener) {
+    public boolean addListener(SwitchListener listener) {
         boolean result = false;
 
         listeners.add(listener);
@@ -58,10 +52,10 @@ public class Wire {
         return result;
     }
 
-    private void notifyListeners(WireName gpioPin) {
+    private void notifyListeners(SwitchName gpioPin) {
         if (!listeners.isEmpty()) {
-            for (WireListener listener : listeners) {
-                listener.signalLow(gpioPin);
+            for (SwitchListener listener : listeners) {
+                listener.switchThrown(gpioPin);
             }
         }
     }

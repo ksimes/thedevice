@@ -1,6 +1,6 @@
-package com.jpmorgan.thedevice.colours;
+package com.stronans.thedevice.colours;
 
-import com.jpmorgan.thedevice.wires.WireName;
+import com.stronans.thedevice.wires.WireName;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

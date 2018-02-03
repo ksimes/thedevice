@@ -1,4 +1,4 @@
-package com.jpmorgan.thedevice.switches;
+package com.stronans.thedevice.buttons;
 
 import com.pi4j.io.gpio.Pin;
 
@@ -7,15 +7,14 @@ import static com.pi4j.io.gpio.RaspiPin.*;
 /**
  * Created by S.King on 15/02/2017.
  */
-public enum SwitchName {
-    ONE(GPIO_27),
-    TWO(GPIO_28),
-    THREE(GPIO_29),
+public enum ButtonName {
+    BIG_RED(GPIO_04),
+    COUNTDOWN(GPIO_05),
     NONE(GPIO_00);
 
     private Pin gpioPin;
 
-    private SwitchName(Pin numVal) {
+    private ButtonName(Pin numVal) {
         this.gpioPin = numVal;
     }
 

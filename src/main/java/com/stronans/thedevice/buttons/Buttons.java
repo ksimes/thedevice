@@ -1,12 +1,12 @@
-package com.jpmorgan.thedevice.buttons;
+package com.stronans.thedevice.buttons;
 
 import com.pi4j.io.gpio.GpioController;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.jpmorgan.thedevice.buttons.ButtonName.BIG_RED;
-import static com.jpmorgan.thedevice.buttons.ButtonName.COUNTDOWN;
+import static com.stronans.thedevice.buttons.ButtonName.BIG_RED;
+import static com.stronans.thedevice.buttons.ButtonName.COUNTDOWN;
 
 /**
  * Handles all of the wires on the Device

@@ -1,6 +1,6 @@
-package com.jpmorgan.thedevice.colours;
+package com.stronans.thedevice.colours;
 
-import com.jpmorgan.thedevice.wires.WireName;
+import com.stronans.thedevice.wires.WireName;
 
 import java.util.Arrays;
 

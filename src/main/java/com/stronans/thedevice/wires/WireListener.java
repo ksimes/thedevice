@@ -1,4 +1,4 @@
-package com.jpmorgan.thedevice.wires;
+package com.stronans.thedevice.wires;
 
 /**
  * Created by S.King on 15/02/2017.
@@ -6,5 +6,5 @@ package com.jpmorgan.thedevice.wires;
 public interface WireListener {
 
     // When a wire is cut then the signal goes low.
-    void signalLow(WireName name);
+    void wireCut(WireName name);
 }

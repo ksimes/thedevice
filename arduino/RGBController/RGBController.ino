@@ -139,15 +139,6 @@ long allColours[COLOURSIZE] = {
   Amber, BrightGreen,
 };
 
-// message array to hold incoming data
-// #define BUFFER_SIZE 3
-// #define MAX_MSG_SIZE 200
-
-// String msgs[BUFFER_SIZE] = { "", "", "" };
-//boolean msgAvailable = false;  // whether the msg is complete
-//int lastMsg = 0;
-//int msgCount = 0;
-
 const String MSG_HEADER = "{S ";
 const int MSG_HEADER_SIZE = MSG_HEADER.length();
 

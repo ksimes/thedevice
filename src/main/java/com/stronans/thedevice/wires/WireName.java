@@ -1,4 +1,4 @@
-package com.jpmorgan.thedevice.wires;
+package com.stronans.thedevice.wires;
 
 import com.pi4j.io.gpio.Pin;
 

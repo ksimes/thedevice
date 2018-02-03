@@ -1,24 +1,30 @@
-package com.jpmorgan.thedevice.switches;
+package com.stronans.thedevice.buttons;
 
 import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioPinDigitalInput;
 import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A single wire to detect the wire being cut.
+ * A single button to detect a button press.
  * <p>
  * Created by S.King on 15/02/2017.
  */
-public class Switch {
-    private SwitchName gpioPin;
-    private List<SwitchListener> listeners = new ArrayList<>();
+public class Button {
+    /**
+     * The <code>Logger</code> to be used.
+     */
+    private static Logger log = LogManager.getLogger(Button.class);
+    private ButtonName gpioPin;
+    private List<ButtonListener> listeners = new ArrayList<>();
 
-    public Switch(SwitchName gpioPin, final GpioController gpio) {
+    public Button(ButtonName gpioPin, final GpioController gpio) {
 
         this.gpioPin = gpioPin;
 
@@ -32,19 +38,18 @@ public class Switch {
         thisPin.addListener(new GpioPinListenerDigital() {
             @Override
             public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
-                // Wire goes low as it has been cut
-                if (event.getState().isLow()) {
+                // Button goes high when it has been pressed
+                if (event.getState().isHigh()) {
                     notifyListeners(gpioPin);
                 }
 
                 // display pin state on console
-                System.out.println(" --> GPIO PIN STATE CHANGE: " + event.getPin() + " = " + event.getState());
-
+                log.trace(" --> GPIO PIN STATE CHANGE: " + event.getPin() + " = " + event.getState());
             }
         });
     }
 
-    public boolean addListener(SwitchListener listener) {
+    boolean addListener(ButtonListener listener) {
         boolean result = false;
 
         listeners.add(listener);
@@ -52,10 +57,12 @@ public class Switch {
         return result;
     }
 
-    private void notifyListeners(SwitchName gpioPin) {
+    private void notifyListeners(ButtonName gpioPin) {
+        log.trace(" Notify : " + gpioPin.toString());
+
         if (!listeners.isEmpty()) {
-            for (SwitchListener listener : listeners) {
-                listener.signalHigh(gpioPin);
+            for (ButtonListener listener : listeners) {
+                listener.buttonPressed(gpioPin);
             }
         }
     }

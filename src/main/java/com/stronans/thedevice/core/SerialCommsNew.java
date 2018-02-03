@@ -1,4 +1,4 @@
-package com.jpmorgan.thedevice.core;
+package com.stronans.thedevice.core;
 
 import com.pi4j.io.serial.Serial;
 import com.pi4j.io.serial.SerialDataEvent;
