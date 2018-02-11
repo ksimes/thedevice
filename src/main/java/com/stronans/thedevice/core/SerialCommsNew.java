@@ -27,6 +27,7 @@ public class SerialCommsNew {
     private final Serial serial;
     private String comPort = Serial.DEFAULT_COM_PORT;
     private int speed = 9600;     // Default com speed
+    private static final String NANO_MSG_HEADER = "{S ";
     private final String terminator = "\r";
     private final char terminatorchar = '\r';
 
@@ -97,7 +98,7 @@ public class SerialCommsNew {
     public synchronized void sendMessage(String message) {
         try {
             log.info("Message Sent : [" + message + "] port :" + comPort);
-            message = message + "\r";
+            message = NANO_MSG_HEADER + message + "}"+ terminator;
             serial.write(message);
         } catch (IOException ex) {
             log.error(" ==>> SERIAL WRITE FAILED on port : " + comPort + " : " + ex.getMessage(), ex);

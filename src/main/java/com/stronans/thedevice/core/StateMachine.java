@@ -22,6 +22,9 @@ import com.pi4j.io.gpio.GpioController;
 import com.pi4j.io.gpio.GpioFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.InputStream;
 import java.util.List;
@@ -31,7 +34,9 @@ import java.util.concurrent.TimeUnit;
 import static com.stronans.thedevice.core.State.*;
 import static com.stronans.thedevice.wires.WireName.NONE;
 
-public class StateMachine implements ButtonListener, SwitchListener, WireListener {
+@Component
+@RestController
+public class StateMachine implements ButtonListener, SwitchListener, WireListener, MessageListener {
     /**
      * The <code>Logger</code> to be used.
      */
@@ -44,6 +49,7 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
 
     private static SerialCommsNew LEDNano;
     private static SerialCommsNew CountdownNano;
+    private static Wires wires;
 
     private State state = RESTING;
     private int extraTime = 0;
@@ -62,10 +68,12 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
 
             // Setup communications with Nano devices
             LEDNano = new SerialCommsNew(LED_NANO, CONNECTION_SPEED);
+            LEDNano.addListener(this);
             LEDNano.startComms();
             LEDNano.sendMessage("REST");
 
             CountdownNano = new SerialCommsNew(COUNTDOWN_NANO, CONNECTION_SPEED);
+            CountdownNano.addListener(this);
             CountdownNano.startComms();
             CountdownNano.sendMessage("WAIT");
 
@@ -73,7 +81,7 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
             // Not required here as using a REST interface which is handled by a separate class.
 
             // Setup Wires (to be cut) treated as switches.
-            Wires wires = new Wires(gpio, this);
+            wires = new Wires(gpio, this);
             wires.setExpected(NONE);
 
             // Setup switches
@@ -130,8 +138,7 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
                         break;
 
                     case EXPLODE:
-                        Reset();
-                        state = RESTING;
+                        reset("Reset from Explosion");
                         break;
 
                     case COUNTDOWN:
@@ -147,13 +154,7 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
                 log.debug("Countdown button pressed");
                 switch (state) {
                     case RESTING:
-                        strikes = 0;
-                        CountdownNano.sendMessage("RESET " + extraTime);
-                        log.debug("Start Countdown");
-                        LEDNano.sendMessage("REST");
-
-                        sendSequence(colourSequences.get(colourStartPoint));
-                        state = COUNTDOWN;
+                        startCountdown("Countdown started from button");
                         break;
 
                     case SAFE:
@@ -164,6 +165,16 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
                 }
                 break;
         }
+    }
+
+    private void startCountdown(String logMessage) {
+        strikes = 0;
+        CountdownNano.sendMessage("RESET " + extraTime);
+        log.info(logMessage);
+        LEDNano.sendMessage("REST");
+
+        sendSequence(colourSequences.get(colourStartPoint));
+        state = COUNTDOWN;
     }
 
     @Override
@@ -258,16 +269,25 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
         }
     }
 
-    private void Reset() {
+    @RequestMapping("/device/reset")
+    public void resetFromWeb(String logMessage) {
+        reset("Reset from REST message");
+    }
+
+    public void reset(String logMessage) {
+        log.info(logMessage);
         CountdownNano.sendMessage("WAIT");
         LEDNano.sendMessage("REST");
         selectSetOfColourSequences();
 
         extraTime = 0;
         strikes = 0;
+
+        state = RESTING;
     }
 
     private void explode() {
+        log.info("State EXPLODE");
         state = EXPLODE;
         LEDNano.sendMessage("EXPLODE");
         CountdownNano.sendMessage("EXPLODE");
@@ -331,24 +351,28 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
         showSequence();
     }
 
+    @RequestMapping("/device/start")
     public void startSequence() {
+        log.info("Start selected from REST");
         selectSetOfColourSequences();
+        startCountdown("Countdown started from REST");
+    }
 
-        // keep program running until user aborts (CTRL-C)
+    @Override
+    public void messageReceived() {
         try {
-            while (true) {
-                Thread.sleep(100);
                 String message = "";
                 if(!CountdownNano.messages().isEmpty()) {
                     message = CountdownNano.messages().take();
+                    log.info("Msg from Countdown Nano :" + message);
                     processMessage(message, CountdownNano.getPort());
                 }
 
                 if(!LEDNano.messages().isEmpty()) {
                     message = LEDNano.messages().take();
+                    log.info("Msg from LED Nano :" + message);
                     processMessage(message, LEDNano.getPort());
                 }
-            }
         } catch (InterruptedException e) {
             log.error(" Interrupt during sleep : " + e.getMessage(), e);
         }
