@@ -6,6 +6,8 @@ package com.stronans.thedevice.core;
  * Created by S.King on 13/02/2017.
  */
 
+import com.pi4j.io.gpio.GpioController;
+import com.pi4j.io.gpio.GpioFactory;
 import com.stronans.thedevice.buttons.ButtonListener;
 import com.stronans.thedevice.buttons.ButtonName;
 import com.stronans.thedevice.buttons.Buttons;
@@ -18,8 +20,6 @@ import com.stronans.thedevice.switches.Switches;
 import com.stronans.thedevice.wires.WireListener;
 import com.stronans.thedevice.wires.WireName;
 import com.stronans.thedevice.wires.Wires;
-import com.pi4j.io.gpio.GpioController;
-import com.pi4j.io.gpio.GpioFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -54,6 +54,7 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
     private State state = RESTING;
     private int extraTime = 0;
     private int strikes = 0;
+    private int successes = 0;
 
     private List<ColourSequence> colourSequences;
     private int colourStartPoint = 0;
@@ -177,6 +178,16 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
         state = COUNTDOWN;
     }
 
+    private void startCountdownWith30(String logMessage) {
+        strikes = 0;
+        CountdownNano.sendMessage("RESET " + 26);
+        log.info(logMessage);
+        LEDNano.sendMessage("REST");
+
+        sendSequence(colourSequences.get(colourStartPoint));
+        state = COUNTDOWN;
+    }
+
     @Override
     public void switchThrown(SwitchName name) {
         log.debug("Switch thrown");
@@ -211,6 +222,7 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
 
                 if (name.equals(item.getDecode())) {
                     CountdownNano.sendMessage("2");
+                    successes++;
                     log.debug("Success");
                 } else {
                     // Allowed 3 mistakes then explodes
@@ -227,12 +239,12 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
                 wiresCutPoint++;
 
                 // Cut all six wires without 3 mistakes then safe
-                if(wiresCutPoint == 6) {
+//                if(wiresCutPoint == 6) {
+                if (successes == 3) {
                     CountdownNano.sendMessage("SAFE");
                     LEDNano.sendMessage("SAFE");
                     state = SAFE;
-                }
-                else {
+                } else {
                     sendSequence(colourSequences.get(colourStartPoint));
                     showSequence();
                 }
@@ -249,7 +261,7 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
     private void sendSequence(ColourSequence item) {
         String msg = "Q ";
 
-        for(ColourSet colour : item.getSequence()) {
+        for (ColourSet colour : item.getSequence()) {
             msg += colour.getVal() + " ";
         }
 
@@ -269,33 +281,16 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
         }
     }
 
-    @RequestMapping("/device/reset")
-    public void resetFromWeb(String logMessage) {
-        reset("Reset from REST message");
-    }
-
-    public void reset(String logMessage) {
-        log.info(logMessage);
-        CountdownNano.sendMessage("WAIT");
-        LEDNano.sendMessage("REST");
-        selectSetOfColourSequences();
-
-        extraTime = 0;
-        strikes = 0;
-
-        state = RESTING;
-    }
-
     private void explode() {
         log.info("State EXPLODE");
         state = EXPLODE;
         LEDNano.sendMessage("EXPLODE");
         CountdownNano.sendMessage("EXPLODE");
-        SendMsgToPopper.Send(SendMsgToPopper.Action.POP);
+//        SendMsgToPopper.Send(SendMsgToPopper.Action.POP);
         // Select new set of colours
         selectSetOfColourSequences();
         wait(5);
-        SendMsgToPopper.Send(SendMsgToPopper.Action.RESET);
+//        SendMsgToPopper.Send(SendMsgToPopper.Action.RESET);
         extraTime = 0;
         strikes = 0;
     }
@@ -351,6 +346,26 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
         showSequence();
     }
 
+    @Override
+    public void messageReceived() {
+        try {
+            String message = "";
+            if (!CountdownNano.messages().isEmpty()) {
+                message = CountdownNano.messages().take();
+                log.info("Msg from Countdown Nano :" + message);
+                processMessage(message, CountdownNano.getPort());
+            }
+
+            if (!LEDNano.messages().isEmpty()) {
+                message = LEDNano.messages().take();
+                log.info("Msg from LED Nano :" + message);
+                processMessage(message, LEDNano.getPort());
+            }
+        } catch (InterruptedException e) {
+            log.error(" Interrupt during sleep : " + e.getMessage(), e);
+        }
+    }
+
     @RequestMapping("/device/start")
     public void startSequence() {
         log.info("Start selected from REST");
@@ -358,23 +373,32 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
         startCountdown("Countdown started from REST");
     }
 
-    @Override
-    public void messageReceived() {
-        try {
-                String message = "";
-                if(!CountdownNano.messages().isEmpty()) {
-                    message = CountdownNano.messages().take();
-                    log.info("Msg from Countdown Nano :" + message);
-                    processMessage(message, CountdownNano.getPort());
-                }
+    @RequestMapping("/device/start30")
+    public void startSequenceWith30() {
+        log.info("Start 30 selected from REST");
+        selectSetOfColourSequences();
+        startCountdownWith30("Countdown 30 started from REST");
+    }
 
-                if(!LEDNano.messages().isEmpty()) {
-                    message = LEDNano.messages().take();
-                    log.info("Msg from LED Nano :" + message);
-                    processMessage(message, LEDNano.getPort());
-                }
-        } catch (InterruptedException e) {
-            log.error(" Interrupt during sleep : " + e.getMessage(), e);
-        }
+    @RequestMapping("/device/explode")
+    public void deviceExplode() {
+        explode();
+    }
+
+    @RequestMapping("/device/reset")
+    public void resetFromWeb(String logMessage) {
+        reset("Reset from REST message");
+    }
+
+    public void reset(String logMessage) {
+        log.info(logMessage);
+        CountdownNano.sendMessage("WAIT");
+        LEDNano.sendMessage("REST");
+        selectSetOfColourSequences();
+
+        extraTime = 0;
+        strikes = 0;
+
+        state = RESTING;
     }
 }

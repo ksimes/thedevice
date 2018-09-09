@@ -1,38 +1,35 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import {CommandService} from "./services/command.services";
 import {Configuration} from "./model/configuration";
 
 @Component({
-  selector: 'app-click-me2',
+  selector: 'app-click-start30',
   providers: [Configuration, CommandService],
   template: `
-    <button (click)="onClickMe2($event)">Start device</button>
+    <button (click)="onClickMe2($event)">Start device with 30</button>
     {{clickMessage}}`
 })
-export class ClickMe2Component {
+export class ClickStart30Component {
   clickMessage = '';
   clicks = 1;
 
-  response : String;
+  response: String;
 
   constructor(private _commandService: CommandService, public _configuration: Configuration) {
   }
 
   onClickMe2(event: any) {
     this.sendStart();
-    this.clickMessage = 'Device has been started';
-    let evtMsg = event ? ' Device has been started' : '';
-    this.clickMessage = (`Click #${this.clicks++}. ${evtMsg}`);
-  }
-  onClickMe() {
   }
 
   private sendStart(): void {
-    this._commandService.startDevice()
+    this._commandService.startDeviceWith30()
       .subscribe((data: String) => this.response = data,
         error => console.log(error),
         () => {
-          console.log('Reset of device complete');
+          let evtMsg = event ? ' Device started with 31 mins' : '';
+          this.clickMessage = (`${evtMsg}. Click #${this.clicks++}.`);
+          console.log('Start of device complete');
         }
       );
   }

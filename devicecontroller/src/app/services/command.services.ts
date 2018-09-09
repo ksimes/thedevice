@@ -22,7 +22,15 @@ export class CommandService {
     return this._http.get<String>(this.actionUrl + this.configuration.startCommand);
   };
 
+  public startDeviceWith30 = (): Observable<String> => {
+    return this._http.get<String>(this.actionUrl + this.configuration.startCommandWith30);
+  };
+
   public resetDevice = (): Observable<String> => {
     return this._http.get<String>(this.actionUrl + this.configuration.resetCommand);
+  };
+
+  public explodeDevice = (): Observable<String> => {
+    return this._http.get<String>(this.actionUrl + this.configuration.explodeCommand);
   };
 }

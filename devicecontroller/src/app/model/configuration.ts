@@ -10,6 +10,8 @@ export class Configuration {
 
   public resetCommand:string = "/reset";
   public startCommand:string = "/start";
+  public startCommandWith30 :string = "/start30";
+  public explodeCommand :string = "/explode";
 
   public ServerWithApiUrl = this.Server + this.BaseApiUrl;
 }

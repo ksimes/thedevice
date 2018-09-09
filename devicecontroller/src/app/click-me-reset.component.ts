@@ -1,26 +1,24 @@
-
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import {Configuration} from "./model/configuration";
 import {CommandService} from "./services/command.services";
 
 @Component({
-  selector: 'app-click-me',
+  selector: 'app-click-reset',
   providers: [Configuration, CommandService],
   template: `
     <button (click)="onClickMe()">Reset</button>
     {{clickMessage}}`
 })
 
-export class ClickMeComponent {
+export class ClickResetComponent {
   clickMessage = '';
-  response : String;
+  response: String;
 
   constructor(private _commandService: CommandService, public _configuration: Configuration) {
   }
 
   onClickMe() {
     this.sendReset();
-    this.clickMessage = 'Device has been reset';
   }
 
   private sendReset(): void {
@@ -28,6 +26,7 @@ export class ClickMeComponent {
       .subscribe((data: String) => this.response = data,
         error => console.log(error),
         () => {
+          this.clickMessage = 'Device has been reset';
           console.log('Reset of device complete');
         }
       );
