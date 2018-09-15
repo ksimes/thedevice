@@ -8,7 +8,7 @@
 // Serial comms speed
 #define SERIAL_SPEED 115200
 
-#define BASE_TIME 5
+#define BASE_TIME 30
 
 #define RESTING 0
 #define COUNTDOWN 1

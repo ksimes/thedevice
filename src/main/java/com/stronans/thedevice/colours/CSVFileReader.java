@@ -90,6 +90,7 @@ public class CSVFileReader {
         return result;
     }
 
+    // Only used for producing the colourset output file.
     public static void main(String[] args) {
         FileOutputStream fop = null;
         File file;
