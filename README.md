@@ -12,20 +12,42 @@ Originally developed for CDX 2017.
   
 * This is version 2.0 of the device for CDX 2018
 
+version 2 loses the big red button which was used for adding minutes to the timer manually.
+This is now controlled by a REST endpoint. Also the start countdown button is no longer connected.
+Again this is controlled by a REST endpoint.
+  
+
 ### How do I get set up? ###
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+- Summary of set up
+- Configuration
+
+  - GPIO pins are setup in the Names classes, SwitchName, WireName and ButtonName.
+  - Choice of 6 Colours for the wires is pulled from the CSV file in the resouces folder.
+    This is loaded as an array and 6 contiguous values are selected. 
+- Dependencies.
+  - Defined in the POM file.
+
+- Database configuration
+  - None
+- How to run tests
+- Deployment instructions
+  - mvn
 
 ### Contribution guidelines ###
 
-* Writing tests
-* Code review
-* Other guidelines
+- Writing tests
+- Code review
+- Other guidelines
+
+Connections
+-----------
+
+Raspberry Pi II pinouts used: 
+
+![alt text](./pinouts.png "Raspberry Pi II pinouts used")
+
+
 
 ### Who do I talk to? ###
 
