@@ -1,0 +1,24 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:		colour puzzle
+# Required-Start:	$remote_fs $syslog
+# Required-Stop:	$remote-fs $syslog
+# Default-Start:	2 3 4 5
+# Default-Stop:		0 1 6
+# Short-Description: 	Script to start and stop colour by numbers puzzle.
+# Description:		Script to start and stop colour by numbers puzzle.
+### END INIT INFO
+
+case "$1" in
+ start)
+  echo "Starting Puzzle"
+  /home/pi/thedevice/start.sh
+  ;;
+ stop)
+  echo "Stopping puzzle"
+  killall java
+  ;;
+esac
+
+exit 0
