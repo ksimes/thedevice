@@ -1,0 +1,55 @@
+Borrowed from: https://frillip.com/using-your-raspberry-pi-3-as-a-wifi-access-point-with-hostapd/
+
+1) Run the following commands to install dnsmasq and hostapd and get them ready for configuration:
+	sudo apt-get update
+	sudo apt-get upgrade
+	sudo apt-get install dnsmasq hostapd
+	sudo systemctl stop dnsmasq
+	sudo systemctl stop hostapd
+
+2) Edit the following files to use the settings you want to use:
+	dnsmasq.conf - change your device's IP here
+	hostapd.conf - set your device's WiFi SSID and password here
+	
+3) Copy the following files to your raspberry pi:
+	dhcpd.conf
+	dnsmasq.conf
+	hostapd.conf
+
+	(e.g.) scp dhcpcd.conf pi@192.168.1.110:dhcpcd.conf
+
+4) Configure dhcpd:
+	mv /etc/dhcpcd.conf /etc/dhcpcd.conf.orig
+	mv ~/dhcpcd.conf /etc/dhcpcd.conf
+
+5) Configure hostapd:
+	mv ~/hostapd.conf /etc/hostapd/hostapd.conf
+	sudo vi /etc/default/hostapd
+	- Then set DAEMON_CONF to:
+		DAEMON_CONF="/etc/hostapd/hostapd.conf"
+
+6) Configure dnsmasq:
+	sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig  
+	mv ~/dnsmasq.conf /etc/dnsmasq.conf
+
+7) Set up IPV4 forwarding
+	sudo vi /et/sysctl.conf
+	- Remove the # from the line that says: net.ipv4.ip_forward=1
+	- This will apply from a reboot, or you can activate it immediately with:
+		sudo sh -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
+
+8) Optional: forward the Pi's connection to connected devices:
+	sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE  
+	sudo iptables -A FORWARD -i eth0 -o wlan0 -m state --state RELATED,ESTABLISHED -j ACCEPT  
+	sudo iptables -A FORWARD -i wlan0 -o eth0 -j ACCEPT
+
+	sudo sh -c "iptables-save > /etc/iptables.ipv4.nat"
+	sudo vi /etc/rc.local
+	- Just above "exit 0" add:
+		iptables-restore < /etc/iptables.ipv4.nat
+
+Either reboot the device, or run the following commands:
+	sudo service hostapd start  
+	sudo service dnsmasq start
+
+Hopefully you should have no errors and be able to see your new WiFi hotspot.

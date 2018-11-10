@@ -168,6 +168,16 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
         }
     }
 
+    private void startCountdownAt(int time, String logMessage) {
+        strikes = 0;
+        CountdownNano.sendMessage("RESET " + (time - 5));
+        log.info(logMessage);
+        LEDNano.sendMessage("REST");
+
+        sendSequence(colourSequences.get(colourStartPoint));
+        state = COUNTDOWN;
+    }
+
     private void startCountdown(String logMessage) {
         strikes = 0;
         CountdownNano.sendMessage("RESET " + extraTime);
@@ -178,14 +188,31 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
         state = COUNTDOWN;
     }
 
-    private void startCountdownWith30(String logMessage) {
-        strikes = 0;
-        CountdownNano.sendMessage("RESET " + 26);
-        log.info(logMessage);
-        LEDNano.sendMessage("REST");
+    private void startCountdownWith10(String logMessage) {
+        startCountdownAt(11, logMessage);
+    }
 
-        sendSequence(colourSequences.get(colourStartPoint));
-        state = COUNTDOWN;
+    private void startCountdownWith15(String logMessage) {
+        startCountdownAt(16, logMessage);
+    }
+
+    private void startCountdownWith20(String logMessage) {
+        startCountdownAt(21, logMessage);
+    }
+
+    private void startCountdownWith25(String logMessage) {
+        startCountdownAt(26, logMessage);
+    }
+
+    private void startCountdownWith30(String logMessage) {
+        startCountdownAt(31, logMessage);
+        // strikes = 0;
+        // CountdownNano.sendMessage("RESET " + 26);
+        // log.info(logMessage);
+        // LEDNano.sendMessage("REST");
+
+        // sendSequence(colourSequences.get(colourStartPoint));
+        // state = COUNTDOWN;
     }
 
     @Override
@@ -371,6 +398,34 @@ public class StateMachine implements ButtonListener, SwitchListener, WireListene
         log.info("Start selected from REST");
         selectSetOfColourSequences();
         startCountdown("Countdown started from REST");
+    }
+
+    @RequestMapping("/device/start10")
+    public void startSequenceWith10() {
+        log.info("Start 10 selected from REST");
+        selectSetOfColourSequences();
+        startCountdownWith10("Countdown 10 started from REST");
+    }
+
+    @RequestMapping("/device/start15")
+    public void startSequenceWith15() {
+        log.info("Start 15 selected from REST");
+        selectSetOfColourSequences();
+        startCountdownWith15("Countdown 15 started from REST");
+    }
+
+    @RequestMapping("/device/start20")
+    public void startSequenceWith20() {
+        log.info("Start 20 selected from REST");
+        selectSetOfColourSequences();
+        startCountdownWith20("Countdown 20 started from REST");
+    }
+
+    @RequestMapping("/device/start25")
+    public void startSequenceWith25() {
+        log.info("Start 25 selected from REST");
+        selectSetOfColourSequences();
+        startCountdownWith25("Countdown 25 started from REST");
     }
 
     @RequestMapping("/device/start30")
